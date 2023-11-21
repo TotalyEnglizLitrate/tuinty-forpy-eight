@@ -7,7 +7,7 @@ I made this over the course of a week to test out the features of textual, and f
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/TotalyEnglizLitrate/twenty-forpy-eight
+    git clone https://github.com/TotalyEnglizLitrate/tuinty-forpy-eight
     ```
 
 2. Install textual
