@@ -12,7 +12,7 @@ I made this over the course of a week to test out the features of textual, and f
 
 2. Install textual
     ```
-    pip install textual
+    pip install textual=0.41.0
     ```
 
 3. Infinite fun, at your terminal!
