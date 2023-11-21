@@ -1,7 +1,6 @@
 #todo
 # work on the colour schemes
-# center the Cell class
-
+# implement a function to update colour along with number
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
@@ -79,7 +78,6 @@ class GameHeader(Widget):
         self.query_one("#high_score", Label).update(f"High Score: {high_score}")
 
 
-#todo - implement a function to update colour along with number
 class Cell(Digits):
     def __init__(self, x, y):
         super().__init__("", id = f"cell-{x}-{y}")

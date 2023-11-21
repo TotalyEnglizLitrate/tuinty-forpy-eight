@@ -10,9 +10,9 @@ I made this over the course of a week to test out the features of textual, and f
     git clone https://github.com/TotalyEnglizLitrate/twenty-forpy-eight
     ```
 
-2. Install dependencies
+2. Install textual
     ```bash
-    pip -r requirements.txt
+    pip install textual
     ```
 
 3. Infinite fun, at your terminal!
