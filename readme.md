@@ -6,12 +6,12 @@ I made this over the course of a week to test out the features of textual, and f
 ## Installation
 
 1. Clone the repository:
-    ```bash
+    ```
     git clone https://github.com/TotalyEnglizLitrate/tuinty-forpy-eight
     ```
 
 2. Install textual
-    ```bash
+    ```
     pip install textual
     ```
 
