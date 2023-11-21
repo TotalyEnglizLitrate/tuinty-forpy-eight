@@ -1,5 +1,3 @@
-#!/usr/bin/python3.11
-
 #todo
 # work on the colour schemes
 # center the Cell class
