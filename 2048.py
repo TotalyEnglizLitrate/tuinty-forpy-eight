@@ -1,4 +1,4 @@
-#todo
+#TODO
 # work on the colour schemes
 # implement a function to update colour along with number
 # add weighted rng for 2 or 4 spawning
@@ -8,7 +8,6 @@
 
 # bug list
 # restrict moves when a move is not possible in a given direction
-# fix being able to move after win
 
 
 from textual.app import App, ComposeResult
@@ -127,6 +126,10 @@ class Game(Screen):
     ]
 
 
+    def __init__(self):
+        super().__init__()
+        self.disabled = True
+
 
     def compose(self) -> ComposeResult:
         yield GameHeader()
@@ -142,6 +145,7 @@ class Game(Screen):
         self.query_one(GameHeader).score = 0
         self.query_one(GameHeader).high_score = HIGH_SCORE
         self.query_one(f"#cell-{randint(0, 3)}-{randint(0, 3)}", Cell).update("2")
+        self.disabled = False
 
 
 
@@ -150,6 +154,10 @@ class Game(Screen):
 
 
     def action_move(self, direction:str) -> None:
+
+        if self.disabled:
+            return
+
         _grid = [[self.query_one(f"#cell-{x}-{y}", Cell) for y in range(4)] for x in range(4)]
         scr = []
 
@@ -207,7 +215,7 @@ class Game(Screen):
             self.query_one(f"#cell-{randx}-{randy}", Cell).update("2")
 
         else:
-            self.query_one(GameGrid).disabled = True
+            self.disabled = True
             self.query_one(GameOver).show(
                 win = False, score = self.query_one(GameHeader).score, high_score = HIGH_SCORE
                 )
@@ -216,8 +224,8 @@ class Game(Screen):
 
         for x in range(4):
             for y in range(4):
-                if self.query_one(f"#cell-{x}-{y}", Cell).get_val() >= 16:
-                    self.query_one(GameGrid).disabled = True
+                if self.query_one(f"#cell-{x}-{y}", Cell).get_val() >= 2048:
+                    self.disabled = True
                     self.query_one(GameOver).show(
                         win = True, score = self.query_one(GameHeader).score, high_score = HIGH_SCORE
                         )
