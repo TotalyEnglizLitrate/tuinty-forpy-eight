@@ -108,7 +108,7 @@ class GameGrid(Widget):
 class Game(Screen):
 
     BINDINGS = [
-        Binding("question_mark,F1", "push_screen('help')", "Help", key_display="?"),
+        Binding("question_mark,f1", "push_screen('help')", "Help", key_display="?"),
         Binding("r", "reset", "Reset board"),
         Binding("up,w", "move('up')", "Move up"),
         Binding("down,s", "move('down')", "Move down"),

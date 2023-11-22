@@ -19,4 +19,4 @@ I made this over the course of a week to test out the features of textual, and f
 
 ## How to
 
-- For instructions on how to play, bring up the help screen by pressing "?" when in the game
+- For instructions on how to play, bring up the help screen by pressing "?" or the F1 key when in the game
