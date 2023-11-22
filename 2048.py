@@ -1,13 +1,9 @@
 #TODO
 # work on the colour schemes
 # implement a function to update colour along with number
-# add weighted rng for 2 or 4 spawning
-# rework win msg and add an option to continue playing
-# rework high score system and remove win screen
 
-
-# bug list
-# restrict moves when a move is not possible in a given direction
+#BUG
+# Highscore file doesn't actually work
 
 
 from textual.app import App, ComposeResult
@@ -20,14 +16,14 @@ from textual.widget import Widget
 from textual.widgets import Digits, Footer, Label, Markdown
 
 from pathlib import Path
-from os import sep
-from random import randint, choice
+from random import randint, choice, choices
 from pickle import dump, load
 
-scr_fl_path = Path(str(Path(__file__).absolute().parent)+sep+"scr")
-md_fl_path = Path(str(Path(__file__).absolute().parent)+sep+"2048.md")
+scr_fl_path = Path(__file__).parent.joinpath("scr.pkl")
+md_fl_path = Path(__file__).parent.joinpath("2048.md")
 def not_found(path: Path):
     raise FileNotFoundError(f"File {Path} not found, make sure to clone the entire repository")
+
 
 if scr_fl_path.exists():
     with open(scr_fl_path, 'rb') as scrfl:
@@ -48,31 +44,16 @@ class Help(Screen):
 
 class GameOver(Label):
 
-    def show(self, win:bool, score:int, high_score:int) -> None:
-        if win:
-            self.update(
-                "W I N N E R!\n\n\n"
-                f"You won with a score of {score} "
-                + (
-                    f"You were {high_score - score} points away from beating your high score!"
-                    if high_score > score
-                    else f"You beat your high score by {score - high_score}!"
-                )
-            )
-            if score > high_score:
-                with open(scr_fl_path, 'wb') as scrfl:
-                    high_score = dump(score, scrfl)
-                global HIGH_SCORE
-                HIGH_SCORE = score
-            self.add_class("visible")
-
-        else:
-            self.update(
-                "Uh oh it seems like you ran out of space :(\n\n\n"
-                f"Score: {score}"
-            )
-
-            self.add_class("visible")
+    def show(self, score:int, high_score:int) -> None:
+        self.update(
+            f"Uh oh it seems like you ran out of space :(\n\n\nScore: {score}  High Score: {high_score}"
+        )
+        if score > high_score:
+            with open(scr_fl_path,'wb') as scrfl:
+                dump(high_score, scrfl)
+            global HIGH_SCORE
+            HIGH_SCORE = high_score
+        self.add_class("visible")
 
     def hide(self) -> None:
         self.remove_class("visible")
@@ -80,7 +61,7 @@ class GameOver(Label):
 
 
 class GameHeader(Widget):
-
+    global HIGH_SCORE
     score = reactive(0)
     high_score = reactive(HIGH_SCORE)
 
@@ -114,6 +95,7 @@ class GameGrid(Widget):
 
 
 class Game(Screen):
+
 
     BINDINGS = [
         Binding("question_mark,f1", "push_screen('help')", "Help", key_display="?"),
@@ -159,6 +141,7 @@ class Game(Screen):
             return
 
         _grid = [[self.query_one(f"#cell-{x}-{y}", Cell) for y in range(4)] for x in range(4)]
+        _grid_vals = [[y.get_val() for y in x] for x in _grid]
         scr = []
 
         if direction == "up":
@@ -174,7 +157,6 @@ class Game(Screen):
             grid = [[_grid[x][y] for x in range(4)] for y in range(4)]
 
         del _grid
-
 
         for x in range(1, 4):
             for y in range(4):
@@ -210,26 +192,15 @@ class Game(Screen):
             (x, y) for x in range(4) for y in range(4) if not self.query_one(f"#cell-{x}-{y}").value
             ]
 
-        if empty_sqrs:
+        if empty_sqrs and _grid_vals != [[self.query_one(f"#cell-{x}-{y}", Cell).get_val() for y in range(4)] for x in range(4)]:
             randx, randy = choice(empty_sqrs)
-            self.query_one(f"#cell-{randx}-{randy}", Cell).update("2")
+            self.query_one(f"#cell-{randx}-{randy}", Cell).update(choices(("2", "4"), cum_weights = (90, 100))[0])
 
-        else:
+        elif not empty_sqrs:
             self.disabled = True
             self.query_one(GameOver).show(
-                win = False, score = self.query_one(GameHeader).score, high_score = HIGH_SCORE
+                score = self.query_one(GameHeader).score, high_score = HIGH_SCORE
                 )
-            return
-
-
-        for x in range(4):
-            for y in range(4):
-                if self.query_one(f"#cell-{x}-{y}", Cell).get_val() >= 2048:
-                    self.disabled = True
-                    self.query_one(GameOver).show(
-                        win = True, score = self.query_one(GameHeader).score, high_score = HIGH_SCORE
-                        )
-                    return
 
 
     def on_mount(self) -> None:
@@ -238,10 +209,12 @@ class Game(Screen):
 
 class Board(App[None]):
 
-    CSS_PATH = Path(str(Path(__file__).absolute().parent)+sep+"2048.tcss")
+    _CSS_PATH = Path(__file__).parent.joinpath("2048.tcss")
 
-    if not CSS_PATH.exists():
-        not_found(CSS_PATH)
+    if not _CSS_PATH.exists():
+        not_found(_CSS_PATH)
+
+    CSS_PATH = _CSS_PATH
 
     SCREENS = {"help": Help}
 
