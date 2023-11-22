@@ -1,6 +1,15 @@
 #todo
 # work on the colour schemes
 # implement a function to update colour along with number
+# add weighted rng for 2 or 4 spawning
+# rework win msg and add an option to continue playing
+
+
+
+# bug list
+# restrict moves when a move is not possible in a given direction
+# fix being able to move after win
+
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
@@ -198,20 +207,20 @@ class Game(Screen):
             self.query_one(f"#cell-{randx}-{randy}", Cell).update("2")
 
         else:
+            self.query_one(GameGrid).disabled = True
             self.query_one(GameOver).show(
                 win = False, score = self.query_one(GameHeader).score, high_score = HIGH_SCORE
                 )
-            self.query_one(GameGrid).disabled = True
             return
 
 
         for x in range(4):
             for y in range(4):
-                if self.query_one(f"#cell-{x}-{y}", Cell).get_val() >= 2048:
+                if self.query_one(f"#cell-{x}-{y}", Cell).get_val() >= 16:
+                    self.query_one(GameGrid).disabled = True
                     self.query_one(GameOver).show(
                         win = True, score = self.query_one(GameHeader).score, high_score = HIGH_SCORE
                         )
-                    self.query_one(GameGrid).disabled = True
                     return
 
 
