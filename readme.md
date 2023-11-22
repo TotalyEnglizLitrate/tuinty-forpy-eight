@@ -1,4 +1,4 @@
-[![Made with Textual 0.41.0](https://img.shields.io/badge/Made%20with-Textual-blue)](https://github.com/Textualize/textual)
+## [![Made with Textual 0.41.0](https://img.shields.io/badge/Made%20with-Textual-blue)](https://github.com/Textualize/textual)
 
 ## Why?
 I made this over the course of a week to test out the features of textual, and felt like sharing it.

@@ -9,21 +9,32 @@ from textual.containers import Horizontal
 from textual.screen import Screen
 from textual.css.query import DOMQuery
 from textual.widget import Widget
-from textual.widgets import Digits, Footer, Label
+from textual.widgets import Digits, Footer, Label, Markdown
 
-from os.path import exists, abspath, dirname
+from pathlib import Path
 from os import sep
 from random import randint, choice
 from pickle import dump, load
 
-scr_fl_path = f"{dirname(abspath(__file__))}{sep}scr"
+scr_fl_path = Path(str(Path(__file__).absolute().parent)+sep+"scr")
+md_fl_path = Path(str(Path(__file__).absolute().parent)+sep+"2048.md")
+def not_found():
+    raise FileNotFoundError(f"File {md_fl_path} not found, make sure to clone the entire repository")
 
-
-if exists(scr_fl_path):
+if scr_fl_path.exists():
     with open(scr_fl_path, 'rb') as scrfl:
         HIGH_SCORE = load(scrfl)
 else:
     HIGH_SCORE = 0
+
+
+
+class Help(Screen):
+
+    BINDINGS = [("escape,space,q,question_mark", "pop_screen", "Close")]
+
+    def compose(self) -> ComposeResult:
+        yield Markdown(md_fl_path.read_text() if md_fl_path.exists() else not_found())
 
 
 
@@ -97,6 +108,7 @@ class GameGrid(Widget):
 class Game(Screen):
 
     BINDINGS = [
+        Binding("question_mark,F1", "push_screen('help')", "Help", key_display="?"),
         Binding("r", "reset", "Reset board"),
         Binding("up,w", "move('up')", "Move up"),
         Binding("down,s", "move('down')", "Move down"),
@@ -210,6 +222,8 @@ class Game(Screen):
 class Board(App[None]):
 
     CSS_PATH = "./2048.tcss"
+
+    SCREENS = {"help": Help}
 
     TITLE = "A bad implementation of 2048"
 
