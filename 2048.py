@@ -3,7 +3,7 @@
 # implement a function to update colour along with number
 # add weighted rng for 2 or 4 spawning
 # rework win msg and add an option to continue playing
-
+# rework high score system and remove win screen
 
 
 # bug list
