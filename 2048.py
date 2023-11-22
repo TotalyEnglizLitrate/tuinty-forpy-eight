@@ -18,8 +18,8 @@ from pickle import dump, load
 
 scr_fl_path = Path(str(Path(__file__).absolute().parent)+sep+"scr")
 md_fl_path = Path(str(Path(__file__).absolute().parent)+sep+"2048.md")
-def not_found():
-    raise FileNotFoundError(f"File {md_fl_path} not found, make sure to clone the entire repository")
+def not_found(path: Path):
+    raise FileNotFoundError(f"File {Path} not found, make sure to clone the entire repository")
 
 if scr_fl_path.exists():
     with open(scr_fl_path, 'rb') as scrfl:
@@ -221,7 +221,10 @@ class Game(Screen):
 
 class Board(App[None]):
 
-    CSS_PATH = "./2048.tcss"
+    CSS_PATH = Path(str(Path(__file__).absolute().parent)+sep+"2048.tcss")
+
+    if not CSS_PATH.exists():
+        not_found(CSS_PATH)
 
     SCREENS = {"help": Help}
 
