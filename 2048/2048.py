@@ -1,6 +1,7 @@
 #TODO
 # work on the colour schemes
 # implement a function to update colour along with number
+# allow modification of the colour scheme with a command line argument
 
 
 
@@ -22,7 +23,7 @@ scr_fl_path = Path(__file__).parent.joinpath("scr.pkl")
 md_fl_path = Path(__file__).parent.joinpath("2048.md")
 
 def not_found(path: Path):
-    raise FileNotFoundError(f"File {Path} not found, make sure to clone the entire repository")
+    raise FileNotFoundError(f"File {Path} not found, make sure you have all the required files, if you don't grab them from the github repository")
 
 
 if scr_fl_path.exists():

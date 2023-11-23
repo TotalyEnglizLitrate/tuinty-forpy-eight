@@ -5,17 +5,12 @@ I made this over the course of a week to test out the features of textual, and f
 
 ## Installation
 
-1. Clone the repository:
+1. Install the script and associated files:
     ```
-    git clone https://github.com/TotalyEnglizLitrate/tuinty-forpy-eight
-    ```
-
-2. Install textual
-    ```
-    pip install textual=0.42.0
+    pip install tuinty-forpy-eight
     ```
 
-3. Infinite fun, at your terminal!
+2. Infinite fun, at your terminal!
 
 ## How to
 
