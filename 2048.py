@@ -2,8 +2,6 @@
 # work on the colour schemes
 # implement a function to update colour along with number
 
-#BUG
-# Highscore file doesn't actually work
 
 
 from textual.app import App, ComposeResult
@@ -19,8 +17,10 @@ from pathlib import Path
 from random import randint, choice, choices
 from pickle import dump, load
 
+
 scr_fl_path = Path(__file__).parent.joinpath("scr.pkl")
 md_fl_path = Path(__file__).parent.joinpath("2048.md")
+
 def not_found(path: Path):
     raise FileNotFoundError(f"File {Path} not found, make sure to clone the entire repository")
 
@@ -50,9 +50,9 @@ class GameOver(Label):
         )
         if score > high_score:
             with open(scr_fl_path,'wb') as scrfl:
-                dump(high_score, scrfl)
+                dump(score, scrfl)
             global HIGH_SCORE
-            HIGH_SCORE = high_score
+            HIGH_SCORE = score
         self.add_class("visible")
 
     def hide(self) -> None:
@@ -125,6 +125,7 @@ class Game(Screen):
                 self.query_one(f"#cell-{x}-{y}", Cell).update("")
         self.query_one(GameOver).hide()
         self.query_one(GameHeader).score = 0
+        global HIGH_SCORE
         self.query_one(GameHeader).high_score = HIGH_SCORE
         self.query_one(f"#cell-{randint(0, 3)}-{randint(0, 3)}", Cell).update("2")
         self.disabled = False
@@ -198,6 +199,7 @@ class Game(Screen):
 
         elif not empty_sqrs:
             self.disabled = True
+            global HIGH_SCORE
             self.query_one(GameOver).show(
                 score = self.query_one(GameHeader).score, high_score = HIGH_SCORE
                 )
