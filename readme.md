@@ -10,7 +10,9 @@ I made this over the course of a week to test out the features of textual, and f
     pip install tuinty-forpy-eight
     ```
 
-2. Infinite fun, at your terminal!
+2. Launch the game by running `2048` in a terminal of your choice
+
+3. Infinite fun, at your terminal!
 
 ## How to
 
