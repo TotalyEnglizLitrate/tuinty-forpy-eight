@@ -14,6 +14,25 @@ I made this over the course of a week to test out the features of textual, and f
 
 3. Infinite fun, at your terminal!
 
+## Customizing Colour Scheme
+
+1. Background
+    add the rgb values of the background colour you want along with the 2048 command
+    e.g 2048 -bg[\--background] 0 0 0
+    it is optional and defaults to (143, 0, 255)
+
+2. Background Opacity
+    supply the opacity as a float between 0 and 1
+    e.g 2048 -op[\--opacity] 0.2
+    it is optional and defaults to 0.13
+
+3. Tile colour
+    add the rgb values of the tile colour you want along with the 2048 command
+    e.g 2048 -bg[\--background] 0 0 0
+    it is optional and defaults to (237, 115, 115)
+
+    The above arguments can be used in combination
+
 ## How to
 
 - For instructions on how to play, bring up the help screen by pressing "?" or the F1 key when in the game

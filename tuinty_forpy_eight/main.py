@@ -12,12 +12,15 @@ from textual.reactive import reactive
 from textual.containers import Horizontal
 from textual.screen import Screen
 from textual.css.query import DOMQuery
+from textual.color import Color
 from textual.widget import Widget
 from textual.widgets import Digits, Footer, Label, Markdown
 
 from pathlib import Path
 from random import randint, choice, choices
 from pickle import dump, load
+from math import log2
+from argparse import ArgumentParser
 
 
 scr_fl_path = Path(__file__).parent.joinpath("scr.pkl")
@@ -33,6 +36,26 @@ if scr_fl_path.exists():
 else:
     HIGH_SCORE = 0
 
+parser: ArgumentParser = ArgumentParser(prog = 'tuinty-forpy-eight', description = 'A tui implementation of the "2048" game')
+parser.add_argument(
+    '-bg', '--background', choices = range(256), nargs = 3, default = (143, 0, 255), required = False
+    , type = int
+    )
+
+parser.add_argument(
+    '-tl', '--tile', choices = range(256), nargs = 3, default = (237, 115, 115), required = False
+    , type = int
+)
+
+parser.add_argument(
+    '-op', '--opacity', choices = [round(x*0.01, 2) for x in range(101)], default = 0.13, required = False, type = float
+)
+
+arguments = parser.parse_args()
+
+BACKGROUND_RGB = arguments.background
+OPACITY = arguments.opacity
+TILE_RGB = arguments.tile
 
 
 class Help(Screen):
@@ -81,14 +104,24 @@ class GameHeader(Widget):
 
 
 class Cell(Digits):
+    def update_with_colour(self, value:str):
+        opacity:float = ((log2(int(value) if value else 1)) % 10)*0.05
+        self.update(value)
+        self.styles.background = Color(TILE_RGB[0], TILE_RGB[1], TILE_RGB[2], opacity)
+
     def __init__(self, x, y):
         super().__init__("", id = f"cell-{x}-{y}")
+        self.update_with_colour("")
 
     def get_val(self):
         return int(self.value) if self.value else 0
 
 
 class GameGrid(Widget):
+    def __init__(self):
+        super().__init__()
+        self.styles.background= Color(BACKGROUND_RGB[0], BACKGROUND_RGB[1], BACKGROUND_RGB[2], OPACITY)
+
     def compose(self) -> ComposeResult:
         for x in range(4):
             for y in range(4):
@@ -124,12 +157,12 @@ class Game(Screen):
     def action_reset(self) -> None:
         for x in range(4):
             for y in range(4):
-                self.query_one(f"#cell-{x}-{y}", Cell).update("")
+                self.query_one(f"#cell-{x}-{y}", Cell).update_with_colour("")
         self.query_one(GameOver).hide()
         self.query_one(GameHeader).score = 0
         global HIGH_SCORE
         self.query_one(GameHeader).high_score = HIGH_SCORE
-        self.query_one(f"#cell-{randint(0, 3)}-{randint(0, 3)}", Cell).update("2")
+        self.query_one(f"#cell-{randint(0, 3)}-{randint(0, 3)}", Cell).update_with_colour("2")
         self.disabled = False
 
 
@@ -165,12 +198,12 @@ class Game(Screen):
             for y in range(4):
                 for z in range(1, 5-x):
                     if not grid[x-1][y].value:
-                        grid[x-1][y].update(grid[x][y].value)
+                        grid[x-1][y].update_with_colour(grid[x][y].value)
                         if x+z < 4:
-                            grid[x][y].update(grid[x+z][y].value)
-                            grid[x+z][y].update("")
+                            grid[x][y].update_with_colour(grid[x+z][y].value)
+                            grid[x+z][y].update_with_colour("")
                         else:
-                            grid[x][y].update("")
+                            grid[x][y].update_with_colour("")
 
         while any(
             grid[x][y].get_val() and grid[x][y].get_val() == grid[x-1][y].get_val() for x in range(1, 4) for y in range(4)
@@ -179,11 +212,11 @@ class Game(Screen):
                 for y in range(4):
                     if grid[x][y].get_val() and grid[x-1][y].get_val() == grid[x][y].get_val():
                         scr.append(grid[x][y].get_val()*2)
-                        grid[x-1][y].update(str(scr[-1]))
-                        grid[x][y].update("")
+                        grid[x-1][y].update_with_colour(str(scr[-1]))
+                        grid[x][y].update_with_colour("")
                         for z in range(x, 3):
-                            grid[z][y].update(grid[z+1][y].value)
-                        grid[3][y].update("")
+                            grid[z][y].update_with_colour(grid[z+1][y].value)
+                        grid[3][y].update_with_colour("")
 
         self.query_one(GameHeader).score += sum(scr)
 
@@ -197,7 +230,7 @@ class Game(Screen):
 
         if empty_sqrs and _grid_vals != [[self.query_one(f"#cell-{x}-{y}", Cell).get_val() for y in range(4)] for x in range(4)]:
             randx, randy = choice(empty_sqrs)
-            self.query_one(f"#cell-{randx}-{randy}", Cell).update(choices(("2", "4"), cum_weights = (90, 100))[0])
+            self.query_one(f"#cell-{randx}-{randy}", Cell).update_with_colour(choices(("2", "4"), cum_weights = (90, 100))[0])
 
         elif not empty_sqrs:
             self.disabled = True

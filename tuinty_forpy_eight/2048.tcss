@@ -7,10 +7,10 @@ GameGrid {
     layout: grid;
     grid-size: 4 4;
     layer: gameplay;
+    background: rgba(143, 0, 255, 0.13);
 }
 
 GameHeader {
-    background: $primary-background;
     color: $text;
     height: 1;
     dock: top;
@@ -40,7 +40,7 @@ Cell {
     height: 100%;
     text-align: center;
     content-align: center middle;
-    border: round $surface-darken-1;
+    border: tall $surface-darken-1;
 }
 
 GameOver {
