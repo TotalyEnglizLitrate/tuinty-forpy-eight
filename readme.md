@@ -16,19 +16,19 @@ I made this over the course of a week to test out the features of textual, and f
 
 ## Customizing Colour Scheme
 
-1. Background
-    add the rgb values of the background colour you want along with the 2048 command
-    e.g 2048 -bg[\--background] 0 0 0
+### 1. Background
+    Supply the rgb values of the background colour you want along with the 2048 command
+    e.g `2048 -bg[--background] 0 0 0`
     it is optional and defaults to (143, 0, 255)
 
-2. Background Opacity
-    supply the opacity as a float between 0 and 1
-    e.g 2048 -op[\--opacity] 0.2
+### 2. Background Opacity
+    Supply the opacity as a float between 0 and 1
+    e.g `2048 -op[\--opacity] 0.2`
     it is optional and defaults to 0.13
 
-3. Tile colour
-    add the rgb values of the tile colour you want along with the 2048 command
-    e.g 2048 -bg[\--background] 0 0 0
+### 3. Tile colour
+    Supply the rgb values of the tile colour you want along with the 2048 command
+    e.g `2048 -bg[\--background] 0 0 0`
     it is optional and defaults to (237, 115, 115)
 
     The above arguments can be used in combination
