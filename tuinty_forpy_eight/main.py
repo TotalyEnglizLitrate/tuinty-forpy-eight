@@ -252,7 +252,10 @@ class Game(Screen):
                 choices(("2", "4"), cum_weights=(90, 100))[0]
             )
 
-        if not empty_sqrs:
+        check = [grid[x][y].get_val() != grid[x - 1][y].get_val() for x in range(1, 4) for y in range(4)]
+        grid = [[grid[x][y] for x in range(4)] for y in range(4)]
+        check.extend([grid[x][y].get_val() != grid[x - 1][y].get_val() for x in range(1, 4) for y in range(4)])
+        if not empty_sqrs and all(check):
             self.disabled = True
             global HIGH_SCORE
             self.query_one(GameOver).show(
