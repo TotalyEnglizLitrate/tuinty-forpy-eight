@@ -24,13 +24,13 @@ it is optional and defaults to (143, 0, 255)
 
 ### 2. Background Opacity
 Supply the opacity as a float between 0 and 1  
-e.g `2048 -op[--opacity] 0.2`  
+e.g. `2048 -op[--opacity] 0.2`  
 it is optional and defaults to 0.13  
 
 ### 3. Tile colour
 Supply the rgb values of the tile colour you want along with the 2048 command  
-e.g `2048 -bg[--background] 0 0 0`  
-it is optional and defaults to (237, 115, 115)  
+e.g. `2048 -bg[--background] 0 0 0`  
+it is optional and defaults to (237, 115, 255)
 
 #### The above arguments can be used in combination
 
