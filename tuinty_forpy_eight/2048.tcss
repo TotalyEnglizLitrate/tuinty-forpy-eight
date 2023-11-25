@@ -7,7 +7,6 @@ GameGrid {
     layout: grid;
     grid-size: 4 4;
     layer: gameplay;
-    background: rgba(143, 0, 255, 0.13);
 }
 
 GameHeader {
@@ -58,4 +57,42 @@ GameOver {
 
 .visible {
     visibility: visible;
+}
+
+QuitScreen{
+    align: center middle;
+    background: $error-darken-2;
+}
+
+#dialog {
+    width: 50%;
+    height: 25%;
+    grid-size: 2;
+    grid-rows: 1fr 4;
+    grid-columns: 1fr;
+    padding: 0 1;
+    width: 60;
+    height: 11;
+    border: thick $background 80%;
+    background: $error-darken-2;
+}
+
+#question {
+    column-span: 3;
+    row-span: 1;
+    align: center top;
+    content-align: center middle;
+    text-align: center;
+}
+
+Button {
+    column-span: 1;
+    row-span: 1;
+    width: 100%;
+    align: center middle;
+    content-align: center middle;
+}
+
+#cancel {
+    column-span: 2;
 }

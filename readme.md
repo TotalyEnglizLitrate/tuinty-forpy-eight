@@ -6,8 +6,10 @@ I made this over the course of a week to test out the features of textual, and f
 ## Installation
 
 1. Install the script and associated files:
-    pip install tuinty-forpy-eight
 
+```
+    pip install tuinty-forpy-eight
+```
 
 2. Launch the game by running `2048` in a terminal of your choice
 

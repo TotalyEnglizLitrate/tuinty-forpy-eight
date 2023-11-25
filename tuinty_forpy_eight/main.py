@@ -1,20 +1,13 @@
-#TODO
-# work on the colour schemes
-# implement a function to update colour along with number
-# allow modification of the colour scheme with a command line argument
-# add an prompt asking whether to save game state for next launch
-
-
-
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.reactive import reactive
-from textual.containers import Horizontal
-from textual.screen import Screen
+from textual.containers import Horizontal, Grid
+from textual.screen import Screen, ModalScreen
 from textual.css.query import DOMQuery
 from textual.color import Color
 from textual.widget import Widget
-from textual.widgets import Digits, Footer, Label, Markdown
+from textual.widgets import Digits, Footer, Label, Markdown, Button, Static
+
 
 from pathlib import Path
 from random import randint, choice, choices
@@ -22,33 +15,36 @@ from pickle import dump, load
 from math import log2
 from argparse import ArgumentParser
 
+USERNAME = Path('~').home().__str__().split('/')[-1]
+SCR_FL_PATH = Path(__file__).parent.joinpath(f"scr_{USERNAME}.pkl")
+MD_FL_PATH = Path(__file__).parent.joinpath("2048.md")
+SAVE_FILE_PATH = Path(__file__).parent.joinpath(f"save_{USERNAME}.pkl")
 
-scr_fl_path = Path(__file__).parent.joinpath("scr.pkl")
-md_fl_path = Path(__file__).parent.joinpath("2048.md")
 
 def not_found(path: Path):
-    raise FileNotFoundError(f"File {path.__str__()} not found, make sure you have all the required files, if you don't, try reinstalling or grab them from the github repository")
+    raise FileNotFoundError(
+        f"File {path.__str__()} not found, make sure you have all the required files, if you don't, try reinstalling "
+        "or grab them from the github repository")
 
 
-if scr_fl_path.exists():
-    with open(scr_fl_path, 'rb') as scrfl:
+if SCR_FL_PATH.exists():
+    with open(SCR_FL_PATH, 'rb') as scrfl:
         HIGH_SCORE = load(scrfl)
 else:
     HIGH_SCORE = 0
 
-parser: ArgumentParser = ArgumentParser(prog = 'tuinty-forpy-eight', description = 'A tui implementation of the "2048" game')
+parser: ArgumentParser = ArgumentParser(prog='tuinty-forpy-eight',
+                                        description='A tui implementation of the "2048" game')
 parser.add_argument(
-    '-bg', '--background', choices = range(256), nargs = 3, default = (143, 0, 255), required = False
-    , type = int
-    )
-
-parser.add_argument(
-    '-tl', '--tile', choices = range(256), nargs = 3, default = (237, 115, 115), required = False
-    , type = int
+    '-bg', '--background', choices=range(256), nargs=3, default=(143, 0, 255), required=False, type=int
 )
 
 parser.add_argument(
-    '-op', '--opacity', choices = [round(x*0.01, 2) for x in range(101)], default = 0.13, required = False, type = float
+    '-tl', '--tile', choices=range(256), nargs=3, default=(237, 115, 255), required=False, type=int
+)
+
+parser.add_argument(
+    '-op', '--opacity', choices=[round(x * 0.01, 2) for x in range(101)], default=0.13, required=False, type=float
 )
 
 arguments = parser.parse_args()
@@ -59,22 +55,52 @@ TILE_RGB = arguments.tile
 
 
 class Help(Screen):
-
     BINDINGS = [("escape,space,q,question_mark", "pop_screen", "Close")]
 
     def compose(self) -> ComposeResult:
-        yield Markdown(md_fl_path.read_text() if md_fl_path.exists() else not_found())
+        yield Markdown(MD_FL_PATH.read_text() if MD_FL_PATH.exists() else not_found(MD_FL_PATH))
 
+
+class QuitScreen(ModalScreen):
+    def __init__(self, grid: list[str, ...], score: int):
+        super().__init__()
+        self.grid = grid
+        self.score = score
+
+    def compose(self) -> ComposeResult:
+        yield Grid(
+            Static("Do you want to save current game state?", id="question"),
+            Button("Save and Quit", variant="success", id="save"),
+            Button("Quit", variant="error", id="quit"),
+            Button("Cancel", variant="primary", id="cancel"),
+            id="dialog"
+        )
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "quit":
+            self.app.pop_screen()
+            with open(SAVE_FILE_PATH, 'wb') as savefl:
+                dump([[]], savefl)
+                dump(0, savefl)
+            self.app.exit()
+        elif event.button.id == "cancel":
+            self.app.pop_screen()
+        else:
+            self.app.pop_screen()
+            with open(SAVE_FILE_PATH, 'wb') as savefl:
+                dump(self.grid, savefl)
+                dump(self.score, savefl)
+            self.app.exit()
 
 
 class GameOver(Label):
 
-    def show(self, score:int, high_score:int) -> None:
+    def show(self, score: int, high_score: int) -> None:
         self.update(
             f"Uh oh it seems like you ran out of space :(\n\n\nScore: {score}  High Score: {high_score}"
         )
         if score > high_score:
-            with open(scr_fl_path,'wb') as scrfl:
+            with open(SCR_FL_PATH, 'wb') as scrfl:
                 dump(score, scrfl)
             global HIGH_SCORE
             HIGH_SCORE = score
@@ -84,7 +110,6 @@ class GameOver(Label):
         self.remove_class("visible")
 
 
-
 class GameHeader(Widget):
     global HIGH_SCORE
     score = reactive(0)
@@ -92,25 +117,25 @@ class GameHeader(Widget):
 
     def compose(self):
         with Horizontal():
-            yield Label(self.app.title, id = "app-title")
-            yield Label(id = "score")
-            yield Label(id = "high_score")
+            yield Label(self.app.title, id="app-title")
+            yield Label(id="score")
+            yield Label(id="high_score")
 
-    def watch_score(self, score:int):
+    def watch_score(self, score: int):
         self.query_one("#score", Label).update(f"Score: {score}")
 
-    def watch_high_score(self, high_score:int):
+    def watch_high_score(self, high_score: int):
         self.query_one("#high_score", Label).update(f"High Score: {high_score}")
 
 
 class Cell(Digits):
-    def update_with_colour(self, value:str):
-        opacity:float = ((log2(int(value) if value else 1)) % 10)*0.05
+    def update_with_colour(self, value: str):
+        opacity: float = ((log2(int(value) if value else 1)) % 10) * 0.05
         self.update(value)
         self.styles.background = Color(TILE_RGB[0], TILE_RGB[1], TILE_RGB[2], opacity)
 
     def __init__(self, x, y):
-        super().__init__("", id = f"cell-{x}-{y}")
+        super().__init__("", id=f"cell-{x}-{y}")
         self.update_with_colour("")
 
     def get_val(self):
@@ -120,7 +145,7 @@ class Cell(Digits):
 class GameGrid(Widget):
     def __init__(self):
         super().__init__()
-        self.styles.background= Color(BACKGROUND_RGB[0], BACKGROUND_RGB[1], BACKGROUND_RGB[2], OPACITY)
+        self.styles.background = Color(BACKGROUND_RGB[0], BACKGROUND_RGB[1], BACKGROUND_RGB[2], OPACITY)
 
     def compose(self) -> ComposeResult:
         for x in range(4):
@@ -128,25 +153,19 @@ class GameGrid(Widget):
                 yield Cell(x, y)
 
 
-
 class Game(Screen):
-
-
     BINDINGS = [
         Binding("question_mark,f1", "push_screen('help')", "Help", key_display="?"),
         Binding("r", "reset", "Reset board"),
         Binding("up,w", "move('up')", "Move up"),
         Binding("down,s", "move('down')", "Move down"),
         Binding("left,a", "move('left')", "Move left"),
-        Binding("right,d", "move('right')", "Move right"),
-        Binding("q", "quit", "Quit")
+        Binding("right,d", "move('right')", "Move right")
     ]
-
 
     def __init__(self):
         super().__init__()
         self.disabled = True
-
 
     def compose(self) -> ComposeResult:
         yield GameHeader()
@@ -165,13 +184,10 @@ class Game(Screen):
         self.query_one(f"#cell-{randint(0, 3)}-{randint(0, 3)}", Cell).update_with_colour("2")
         self.disabled = False
 
-
-
     def cell(self, x, y):
         return self.query_one(f"#cell-{x}-{y}", Cell)
 
-
-    def action_move(self, direction:str) -> None:
+    def action_move(self, direction: str) -> None:
 
         if self.disabled:
             return
@@ -196,56 +212,69 @@ class Game(Screen):
 
         for x in range(1, 4):
             for y in range(4):
-                for z in range(1, 5-x):
-                    if not grid[x-1][y].value:
-                        grid[x-1][y].update_with_colour(grid[x][y].value)
-                        if x+z < 4:
-                            grid[x][y].update_with_colour(grid[x+z][y].value)
-                            grid[x+z][y].update_with_colour("")
+                for z in range(1, 5 - x):
+                    if not grid[x - 1][y].value:
+                        grid[x - 1][y].update_with_colour(grid[x][y].value)
+                        if x + z < 4:
+                            grid[x][y].update_with_colour(grid[x + z][y].value)
+                            grid[x + z][y].update_with_colour("")
                         else:
                             grid[x][y].update_with_colour("")
 
         while any(
-            grid[x][y].get_val() and grid[x][y].get_val() == grid[x-1][y].get_val() for x in range(1, 4) for y in range(4)
+                grid[x][y].get_val() and grid[x][y].get_val() == grid[x - 1][y].get_val() for x in range(1, 4) for y in
+                range(4)
         ):
             for x in range(1, 4):
                 for y in range(4):
-                    if grid[x][y].get_val() and grid[x-1][y].get_val() == grid[x][y].get_val():
-                        scr.append(grid[x][y].get_val()*2)
-                        grid[x-1][y].update_with_colour(str(scr[-1]))
+                    if grid[x][y].get_val() and grid[x - 1][y].get_val() == grid[x][y].get_val():
+                        scr.append(grid[x][y].get_val() * 2)
+                        grid[x - 1][y].update_with_colour(str(scr[-1]))
                         grid[x][y].update_with_colour("")
                         for z in range(x, 3):
-                            grid[z][y].update_with_colour(grid[z+1][y].value)
+                            grid[z][y].update_with_colour(grid[z + 1][y].value)
                         grid[3][y].update_with_colour("")
 
         self.query_one(GameHeader).score += sum(scr)
-
 
         if self.query_one(GameHeader).score >= self.query_one(GameHeader).high_score:
             self.query_one(GameHeader).high_score = self.query_one(GameHeader).score
 
         empty_sqrs = [
-            (x, y) for x in range(4) for y in range(4) if not self.query_one(f"#cell-{x}-{y}").value
-            ]
+            (x, y) for x in range(4) for y in range(4) if not self.query_one(f"#cell-{x}-{y}", Cell).value
+        ]
 
-        if empty_sqrs and _grid_vals != [[self.query_one(f"#cell-{x}-{y}", Cell).get_val() for y in range(4)] for x in range(4)]:
+        if empty_sqrs and _grid_vals != [[self.query_one(f"#cell-{x}-{y}", Cell).get_val() for y in range(4)] for x in
+                                         range(4)]:
             randx, randy = choice(empty_sqrs)
-            self.query_one(f"#cell-{randx}-{randy}", Cell).update_with_colour(choices(("2", "4"), cum_weights = (90, 100))[0])
+            empty_sqrs.remove((randx, randy))
+            self.query_one(f"#cell-{randx}-{randy}", Cell).update_with_colour(
+                choices(("2", "4"), cum_weights=(90, 100))[0]
+            )
 
-        elif not empty_sqrs:
+        if not empty_sqrs:
             self.disabled = True
             global HIGH_SCORE
             self.query_one(GameOver).show(
-                score = self.query_one(GameHeader).score, high_score = HIGH_SCORE
-                )
-
+                score=self.query_one(GameHeader).score, high_score=HIGH_SCORE
+            )
 
     def on_mount(self) -> None:
         self.action_reset()
+        if SAVE_FILE_PATH.exists():
+            with open(SAVE_FILE_PATH, 'rb+') as savefl:
+                grid = load(savefl)
+                if grid[0]:
+                    for x in range(4):
+                        for y in range(4):
+                            self.query_one(f"#cell-{x}-{y}", Cell).update_with_colour(grid[x][y])
+                score = load(savefl)
+                self.query_one(GameHeader).score = score
+                self.query_one(GameHeader).high_score = score if score > HIGH_SCORE else HIGH_SCORE
+                savefl.truncate()
 
 
 class Board(App[None]):
-
     _CSS_PATH = Path(__file__).parent.joinpath("2048.tcss")
 
     if not _CSS_PATH.exists():
@@ -257,13 +286,22 @@ class Board(App[None]):
 
     TITLE = "A bad implementation of 2048"
 
+    BINDINGS = [Binding("q", "save", "Quit")]
+
     def on_mount(self) -> None:
         self.push_screen(Game())
 
+    def action_save(self):
+        self.push_screen(
+            QuitScreen(
+                [[self.query_one(f"#cell-{x}-{y}", Cell).value for y in range(4)] for x in range(4)],
+                self.query_one(GameHeader).score
+            )
+        )
+
 
 def main():
-        Board().run()
-
+    Board().run()
 
 
 if __name__ == "__main__":

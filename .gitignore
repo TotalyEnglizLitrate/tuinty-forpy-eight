@@ -1,4 +1,4 @@
-scr.pkl
+*.pkl
 dist
 tuinty_forpy_eight.egg-info
 build
