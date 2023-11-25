@@ -3,7 +3,6 @@ from textual.binding import Binding
 from textual.reactive import reactive
 from textual.containers import Horizontal, Grid
 from textual.screen import Screen, ModalScreen
-from textual.css.query import DOMQuery
 from textual.color import Color
 from textual.widget import Widget
 from textual.widgets import Digits, Footer, Label, Markdown, Button, Static
