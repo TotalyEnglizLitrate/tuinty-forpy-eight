@@ -29,7 +29,7 @@ it is optional and defaults to 0.13
 
 ### 3. Tile colour
 Supply the rgb values of the tile colour you want along with the 2048 command  
-e.g. `2048 -bg[--background] 0 0 0`  
+e.g. `2048 -tl[--tile] 0 0 0`  
 it is optional and defaults to (237, 115, 255)
 
 #### The above arguments can be used in combination
