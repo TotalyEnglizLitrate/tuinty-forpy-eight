@@ -4,7 +4,7 @@ with open("readme.md", "r") as desc:
     long_description = desc.read()
 
 setup(name='tuinty-forpy-eight',
-      version='1.3.1',
+      version='1.3.2',
       description='A tui implementation of the game "2048", made with textual',
       long_description=long_description,
       long_description_content_type="text/markdown",

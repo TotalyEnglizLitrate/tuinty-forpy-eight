@@ -14,7 +14,7 @@ from pickle import dump, load
 from math import log2
 from argparse import ArgumentParser, Namespace
 
-USERNAME: str = str(Path('~').home()).split('/')[-1]
+USERNAME: str = Path('~').home().stem
 SCR_FL_PATH: Path = Path(__file__).parent.joinpath(f"scr_{USERNAME}.pkl")
 MD_FL_PATH: Path = Path(__file__).parent.joinpath("2048.md")
 SAVE_FILE_PATH: Path = Path(__file__).parent.joinpath(f"save_{USERNAME}.pkl")
